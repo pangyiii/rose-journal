@@ -35,7 +35,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: font-family: 'Noto Serif SC', serif;
+            font-family: 'Noto Serif SC', serif;
             -webkit-font-smoothing: antialiased;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
@@ -1205,6 +1205,45 @@
 
     const PASS_STORAGE_KEY = 'atelier_rose_journal_pin';
     const DRAFT_STORAGE_KEY = 'atelier_rose_journal_draft';
+    const CLIENT_ID_KEY = 'atelier_rose_journal_client_id';
+
+    /* ---------- 督导推送服务配置 ----------
+       部署好 push-worker 之后，把下面两个值换成你自己的：
+       1. workerBase：wrangler deploy 输出的 Worker 地址
+       2. vapidPublicKey：跟 Worker 里 VAPID_PUBLIC_KEY 保持完全一致 */
+    const PUSH_CONFIG = {
+        workerBase: 'https://rose-journal-push.YOUR-SUBDOMAIN.workers.dev',
+        vapidPublicKey: 'BNCFziIUAvrL3MhRkC0ryQp1Z-W82z_eHnectQsJ-GhUU2h1tzV3djBz6FwgNQSrk7ul8ioixDznxUJV1dLVsyA'
+    };
+
+    function getClientId() {
+        let id = localStorage.getItem(CLIENT_ID_KEY);
+        if (!id) {
+            id = 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+            localStorage.setItem(CLIENT_ID_KEY, id);
+        }
+        return id;
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+    }
+
+    // 打卡后，把"今天已完成"同步给推送服务，这样到点就不会再收到督导提醒
+    async function syncCheckinToServer(dateStr) {
+        try {
+            await fetch(`${PUSH_CONFIG.workerBase}/api/checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId: getClientId(), date: dateStr })
+            });
+        } catch (e) {
+            console.warn('打卡状态同步失败（不影响本地记录）：', e);
+        }
+    }
 
     let ledgerDB = [];
     try {
@@ -1291,26 +1330,50 @@
     }
 
     async function toggleWebPushBell() {
-        if (!('Notification' in window)) {
-            await showAtelierAlert('当前环境未探知到系统级通知支持，若是苹果手机，请先点击分享按钮【添加到主屏幕】后再开启。', '钟铃提示');
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            await showAtelierAlert('当前环境未探知到系统级通知支持，若是苹果手机，请先点击分享按钮【添加到主屏幕】后再开启（且需 iOS 16.4 及以上）。', '钟铃提示');
+            return;
+        }
+
+        if (PUSH_CONFIG.workerBase.includes('YOUR-SUBDOMAIN')) {
+            await showAtelierAlert('督导推送服务尚未配置。请先按照 push-worker/README.md 部署推送服务，并把地址填入 index.html 的 PUSH_CONFIG。', '尚待铭刻');
             return;
         }
 
         if (Notification.permission === 'granted') {
             const streak = computeConsecutiveDays();
-            await showAtelierAlert(`钟铃已处于缔结状态。每日 15:00、18:00、21:00 若尚未打卡，手札将自动横幅督省。\n当前连续研习已达 ${streak} 日。`, '督导钟铃');
+            await showAtelierAlert(`钟铃已处于缔结状态。每日 15:00、18:00、21:00 若尚未打卡，手札将自动督省提醒。\n当前连续研习已达 ${streak} 日。`, '督导钟铃');
             return;
         }
 
         const confirmReq = await showAtelierConfirm('是否授权手札在每日 15:00、18:00、21:00 未做题时向您发送督导通知？', '缔结钟铃');
-        if (confirmReq) {
-            const perm = await Notification.requestPermission();
-            if (perm === 'granted') {
-                updatePushBellStatus();
-                await showAtelierAlert('钟铃之约已成。日落月升，手札将悉心督省研习功课。', '结印功成');
-            } else {
-                await showAtelierAlert('通知权限未获准许。日后如需开启，可在苹果设置中允许手札通知。', '封缄未开');
-            }
+        if (!confirmReq) return;
+
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+            await showAtelierAlert('通知权限未获准许。日后如需开启，可在苹果设置中允许手札通知。', '封缄未开');
+            return;
+        }
+
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const subscription = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey)
+            });
+
+            const resp = await fetch(`${PUSH_CONFIG.workerBase}/api/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId: getClientId(), subscription })
+            });
+            if (!resp.ok) throw new Error('订阅登记失败');
+
+            updatePushBellStatus();
+            await showAtelierAlert('钟铃之约已成。日落月升，手札将悉心督省研习功课。', '结印功成');
+        } catch (err) {
+            console.error('推送订阅失败：', err);
+            await showAtelierAlert('钟铃缔结未成，请检查网络后重试，或确认督导推送服务已正确部署。', '结印受阻');
         }
     }
 
@@ -1603,6 +1666,12 @@
         saveDB();
         clearDraft(); // 提交成功后清空暂存草稿
         refreshAll();
+
+        // 若打卡的是"今天"，通知督导推送服务：今日已完成，无需再发提醒
+        const todayLocalStr = new Date().toISOString().slice(0, 10);
+        if (d === todayLocalStr) {
+            syncCheckinToServer(d);
+        }
 
         // 界面恢复初始状态
         MODULE_LIST.forEach(m => {
