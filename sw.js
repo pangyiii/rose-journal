@@ -1,10 +1,9 @@
 /* 行测研习手札 · 离线全量缓存与后台服务 */
-const CACHE_NAME = 'atelier-journal-offline-v4';
+const CACHE_NAME = 'atelier-journal-offline-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
-    './icon.svg',
     './icon-192.png',
     './icon-512.png'
 ];
@@ -48,29 +47,40 @@ self.addEventListener('fetch', (event) => {
     // 只处理 GET 请求，避免拦截 POST 等请求导致异常响应
     if (event.request.method !== 'GET') return;
 
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request)
+    // 页面启动优先访问网络，失败后再回退缓存。
+    // 这可避免 iOS 主屏幕 Web App 二次启动时反复读取损坏或过期的首页。
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
                 .then((networkResponse) => {
-                    // 顺手把新资源存入缓存，下次可离线使用
                     if (networkResponse && networkResponse.ok) {
                         const cloned = networkResponse.clone();
-                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+                        caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', cloned));
                     }
                     return networkResponse;
                 })
                 .catch(async () => {
-                    // 网络不通时：页面导航回退到本地主页，其余资源回退到一个安全的空响应
-                    // 关键修复：绝不能返回 undefined，否则 Safari 会直接报错崩溃
-                    if (event.request.mode === 'navigate') {
-                        const fallback = await caches.match('./index.html');
-                        if (fallback) return fallback;
-                    }
-                    return new Response('', { status: 504, statusText: 'Offline' });
-                });
+                    return (await caches.match('./index.html')) ||
+                        new Response('页面暂时无法载入，请联网后重试。', {
+                            status: 503,
+                            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                        });
+                })
+        );
+        return;
+    }
+
+    // 图片和配置等静态资源仍优先使用缓存。
+    event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+            return fetch(event.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.ok) {
+                    const cloned = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+                }
+                return networkResponse;
+            });
         })
     );
 });
