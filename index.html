@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>行测研习手札 · 典藏版</title>
+
+    <!-- 苹果 iOS 独立屏幕注入专属 Meta 声明 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="研习手札">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="manifest" href="./manifest.json">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --parchment: #FAF5EE;
+            --paper-creme: #FFFDF9;
+            --bordeaux: #4E1C24;
+            --rose-vintage: #B35868;
+            --rose-petal: #DE9EA9;
+            --rose-mist: #F7EAEB;
+            --antique-gold: #C5A059;
+            --ink-text: #382326;
+            --ink-muted: #826065;
+            --border-line: #E2CFCE;
+            --table-grid: #D8B7BC;
+            --shadow-journal: 0 16px 40px rgba(78, 28, 36, 0.08);
+            --radius-curved: 24px;
+            --radius-pill: 9999px;
+        }
+
+        /* 隐藏滚动条并适配苹果安全区 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Serif SC', "Songti SC", "SimSun", serif;
+            -webkit-font-smoothing: antialiased;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+        *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        body {
+            background-color: var(--parchment);
+            color: var(--ink-text);
+            min-height: 100vh;
+            /* 适配苹果手机顶部刘海/灵动岛与底部操作条的安全距离 */
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(60px, env(safe-area-inset-bottom));
+            padding-left: max(10px, env(safe-area-inset-left));
+            padding-right: max(10px, env(safe-area-inset-right));
+            background-image: radial-gradient(circle, rgba(179, 88, 104, 0.08) 1px, transparent 1px);
+            background-size: 26px 26px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .container.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 封缄开幕动画遮罩 */
+        .lock-curtain {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #FFFDF9 0%, #FAF5EE 65%, #F2E7E2 100%);
+            z-index: 99998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            transition: transform 0.85s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+            box-shadow: inset 0 0 100px rgba(78, 28, 36, 0.08);
+        }
+
+        .lock-curtain.unlocked-fly {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .lock-dossier-card {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 420px;
+            padding: 44px 28px 36px;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(78, 28, 36, 0.16);
+            transition: transform 0.4s ease;
+        }
+
+        .lock-dossier-card.shake {
+            animation: retroShake 0.4s ease-in-out;
+        }
+
+        @keyframes retroShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .lock-washi-tape {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 26px;
+            background: rgba(222, 158, 169, 0.68);
+            border-left: 2px dashed rgba(179, 88, 104, 0.5);
+            border-right: 2px dashed rgba(179, 88, 104, 0.5);
+        }
+
+        .lock-seal-wrapper {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 16px;
+            filter: drop-shadow(0 8px 18px rgba(78, 28, 36, 0.22));
+            animation: sealPulse 3.5s ease-in-out infinite;
+        }
+        .lock-seal-wrapper svg { width: 100%; height: 100%; }
+
+        @keyframes sealPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 8px 18px rgba(78, 28, 36, 0.22)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 10px 24px rgba(179, 88, 104, 0.35)); }
+        }
+
+        .lock-brand-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--antique-gold);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .lock-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--bordeaux);
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .lock-card-subtitle {
+            font-size: 12px;
+            color: var(--ink-muted);
+            letter-spacing: 1.5px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .lock-input-capsule {
+            display: flex;
+            align-items: center;
+            background: var(--parchment);
+            border: 1px solid var(--border-line);
+            border-radius: var(--radius-pill);
+            padding: 10px 18px;
+            margin-bottom: 20px;
+        }
+
+        .lock-input-capsule input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: center;
+            font-size: 15px;
+            letter-spacing: 6px;
+            color: var(--bordeaux);
+            font-weight: 600;
+            outline: none;
+        }
+
+        .btn-unlock-dossier {
+            background: linear-gradient(135deg, var(--rose-vintage), var(--bordeaux));
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 13px 28px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 8px 22px rgba(78, 28, 36, 0.2);
+        }
+
+        /* 顶部辅助操作栏 */
+        .journal-top-aux {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        /* 连续打卡徽印（Streak Badge） */
+        .streak-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--paper-creme);
+            border: 1px solid var(--antique-gold);
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            color: var(--bordeaux);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            box-shadow: 0 2px 8px rgba(197, 160, 89, 0.15);
+        }
+
+        .streak-fire-symbol {
+            color: var(--rose-vintage);
+            font-size: 11px;
+        }
+
+        .aux-buttons-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-aux-text {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            color: var(--ink-muted);
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-aux-text.active-bell {
+            background: var(--rose-mist);
+            color: var(--bordeaux);
+            border-color: var(--rose-petal);
+        }
+
+        /* 头部封面（完整保留艺术画幅尺寸） */
+        .journal-header {
+            position: relative;
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: var(--radius-curved);
+            padding: 36px 20px 30px;
+            margin-bottom: 26px;
+            box-shadow: var(--shadow-journal);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .washi-tape {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 26px;
+            background: rgba(222, 158, 169, 0.6);
+            border-left: 2px dashed rgba(179, 88, 104, 0.5);
+            border-right: 2px dashed rgba(179, 88, 104, 0.5);
+            z-index: 2;
+        }
+
+        .header-rose-box {
+            width: 90px;
+            height: 90px;
+            flex-shrink: 0;
+            filter: drop-shadow(2px 4px 8px rgba(78, 28, 36, 0.12));
+        }
+        .header-rose-box svg { width: 100%; height: 100%; }
+
+        .header-text-box {
+            flex: 1;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .post-brand-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--antique-gold);
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .header-text-box h1 {
+            font-size: 25px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: var(--bordeaux);
+            line-height: 1.5;
+            padding-bottom: 4px;
+        }
+
+        .header-text-box p {
+            font-size: 13px;
+            color: var(--ink-muted);
+            letter-spacing: 2px;
+            line-height: 1.6;
+        }
+
+        .header-postmark-box {
+            width: 120px;
+            height: 85px;
+            flex-shrink: 0;
+        }
+        .header-postmark-box svg { width: 100%; height: 100%; }
+
+        /* 导航切换 */
+        .nav-bar-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 26px;
+        }
+
+        .nav-capsule {
+            display: inline-flex;
+            background: var(--paper-creme);
+            padding: 5px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-line);
+            box-shadow: var(--shadow-journal);
+            gap: 6px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 22px;
+            border-radius: var(--radius-pill);
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--ink-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .nav-btn.active {
+            background: var(--rose-vintage);
+            color: #FFFFFF;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(179, 88, 104, 0.3);
+        }
+
+        /* 卡片与折角 */
+        .journal-card {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: var(--radius-curved);
+            padding: 34px 20px 26px;
+            margin-bottom: 26px;
+            box-shadow: var(--shadow-journal);
+            position: relative;
+        }
+
+        .corner-flourish {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--antique-gold);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .corner-tl { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+        .corner-br { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+        .card-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--rose-mist);
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--bordeaux);
+            letter-spacing: 2px;
+        }
+
+        .date-strip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--rose-mist);
+            padding: 7px 18px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-line);
+            margin-bottom: 22px;
+        }
+
+        .date-strip label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--bordeaux);
+        }
+
+        input[type="date"] {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--ink-text);
+            outline: none;
+        }
+
+        /* 做题录入网格 */
+        .module-entry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .entry-ticket {
+            background: #FFFDFB;
+            border: 1px solid var(--border-line);
+            border-radius: 18px;
+            padding: 16px 14px;
+            transition: all 0.25s ease;
+        }
+
+        .entry-ticket.disabled-module {
+            opacity: 0.55;
+            background: var(--parchment);
+            border: 1px dashed var(--border-line);
+        }
+
+        .ticket-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--rose-petal);
+        }
+
+        .ticket-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--bordeaux);
+        }
+
+        .toggle-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--ink-muted);
+            user-select: none;
+        }
+
+        .retro-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--rose-vintage);
+        }
+
+        .entry-row {
+            display: flex;
+            align-items: center;
+            background: var(--parchment);
+            border-radius: var(--radius-pill);
+            padding: 6px 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-line);
+            cursor: text;
+        }
+
+        .entry-ticket.disabled-module .entry-row {
+            background: rgba(0,0,0,0.03);
+            border-color: transparent;
+            cursor: pointer;
+        }
+
+        .entry-row label {
+            font-size: 11px;
+            color: var(--ink-muted);
+            width: 50px;
+            pointer-events: none;
+        }
+
+        .entry-row input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--ink-text);
+            outline: none;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .live-accuracy-tag {
+            text-align: center;
+            font-size: 11px;
+            color: var(--rose-vintage);
+            margin-top: 10px;
+            background: var(--rose-mist);
+            padding: 4px 0;
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+        }
+
+        .entry-ticket.disabled-module .live-accuracy-tag {
+            color: var(--ink-muted);
+            background: transparent;
+            font-weight: normal;
+        }
+
+        .btn-submit-entry {
+            background: linear-gradient(135deg, var(--rose-vintage), var(--bordeaux));
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 15px 28px;
+            font-size: 15px;
+            letter-spacing: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(78, 28, 36, 0.18);
+        }
+
+        /* 12列全览网格明细表 */
+        .table-responsive-box {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--table-grid);
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background: #FFFFFF;
+            text-align: center;
+        }
+
+        .ledger-table th, 
+        .ledger-table td {
+            border: 1px solid var(--table-grid) !important;
+            padding: 8px 2px;
+            line-height: 1.4;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .ledger-table th {
+            background: var(--rose-mist);
+            color: var(--bordeaux);
+            font-weight: 600;
+        }
+
+        .ledger-table tbody tr:nth-child(even) {
+            background-color: var(--parchment);
+        }
+
+        .ledger-table .date-col { width: 14%; }
+        .ledger-table .mod-sub-col { width: 7.8%; }
+        .ledger-table .action-col { width: 8%; }
+
+        .btn-del-record {
+            background: transparent;
+            border: 1px solid var(--rose-petal);
+            color: var(--rose-vintage);
+            padding: 2px 6px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* 统计卡片 */
+        .stat-banner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-paper-card {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: 20px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: var(--shadow-journal);
+        }
+
+        .stat-paper-card .badge-title {
+            font-size: 11px;
+            color: var(--ink-muted);
+            letter-spacing: 2px;
+        }
+
+        .stat-paper-card .badge-num {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--bordeaux);
+            margin: 6px 0;
+        }
+
+        .charts-two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-pod-card {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: var(--shadow-journal);
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--bordeaux);
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .bar-metric-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 12px;
+        }
+
+        .bar-label {
+            width: 72px;
+            color: var(--ink-muted);
+        }
+
+        .bar-groove {
+            flex: 1;
+            height: 10px;
+            background: var(--rose-mist);
+            border-radius: var(--radius-pill);
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .bar-liquid {
+            height: 100%;
+            background: linear-gradient(90deg, var(--rose-petal), var(--rose-vintage));
+            border-radius: var(--radius-pill);
+            width: 0%;
+            transition: width 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .bar-value {
+            width: 46px;
+            text-align: right;
+            font-weight: 700;
+            color: var(--bordeaux);
+        }
+
+        .tab-view {
+            display: none;
+        }
+
+        .tab-view.active-view {
+            display: block;
+        }
+
+        /* 模态弹窗 */
+        .vintage-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(78, 28, 36, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.28s ease;
+        }
+
+        .vintage-modal-overlay.modal-show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .vintage-modal-card {
+            background: var(--paper-creme);
+            border: 1px solid var(--border-line);
+            border-radius: 24px;
+            max-width: 400px;
+            width: 100%;
+            padding: 38px 24px 26px;
+            position: relative;
+            text-align: center;
+        }
+
+        .modal-washi-tape {
+            position: absolute;
+            top: -11px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 22px;
+            background: rgba(222, 158, 169, 0.7);
+            border-left: 2px dashed rgba(179, 88, 104, 0.6);
+            border-right: 2px dashed rgba(179, 88, 104, 0.6);
+        }
+
+        .modal-title-text {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--bordeaux);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .modal-body-text {
+            font-size: 13px;
+            color: var(--ink-muted);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions-bar {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 10px 24px;
+            font-size: 13px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(135deg, var(--rose-vintage), var(--bordeaux));
+            color: #FFFFFF;
+        }
+
+        .btn-modal-secondary {
+            background: var(--rose-mist);
+            color: var(--ink-muted);
+            border: 1px solid var(--border-line);
+        }
+
+        /* 移动设备适配 */
+        @media (max-width: 768px) {
+            .header-rose-box { width: 52px; height: 52px; }
+            .header-postmark-box { width: 75px; height: 52px; }
+            .header-text-box h1 { font-size: 17px; letter-spacing: 2px; }
+            .header-text-box p { font-size: 11px; }
+            .journal-header { padding: 24px 10px 18px; }
+            .charts-two-columns { grid-template-columns: 1fr; }
+            .module-entry-grid { grid-template-columns: 1fr 1fr; }
+            .nav-btn { padding: 8px 12px; font-size: 11px; }
+            .journal-card { padding: 28px 10px 20px; }
+
+            .ledger-table th, 
+            .ledger-table td {
+                font-size: 10px;
+                padding: 6px 1px;
+            }
+            .ledger-table .date-col { width: 17%; }
+            .ledger-table .action-col { width: 7%; }
+        }
+        @media (max-width: 480px) {
+            .module-entry-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 封缄启封面 -->
+<div id="lockScreen" class="lock-curtain">
+    <div class="lock-dossier-card" id="lockCard">
+        <div class="lock-washi-tape"></div>
+        <div class="corner-flourish corner-tl"></div>
+        <div class="corner-flourish corner-tr"></div>
+        <div class="corner-flourish corner-bl"></div>
+        <div class="corner-flourish corner-br"></div>
+
+        <div class="lock-seal-wrapper">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="46" fill="#8B2635" stroke="#681C28" stroke-width="3"/>
+                <circle cx="50" cy="50" r="38" stroke="#FDE8EA" stroke-width="1.6" stroke-dasharray="4 3" opacity="0.75"/>
+                <path d="M50 32 A 9 9 0 0 0 42 45 L 45 66 L 55 66 L 58 45 A 9 9 0 0 0 50 32 Z" fill="#FAF5EE"/>
+                <circle cx="50" cy="41" r="4.5" fill="#8B2635"/>
+            </svg>
+        </div>
+
+        <span class="lock-brand-tag">Atelier Secret · 封缄</span>
+        <div class="lock-card-title" id="lockTitle">行测研习手札</div>
+        <div class="lock-card-subtitle" id="lockSubtitle">手札已封缄 · 键入密钥破印启卷</div>
+
+        <div class="lock-input-capsule">
+            <input type="password" id="passcodeInput" placeholder="输入手札密令" maxlength="16" autofocus onkeydown="handlePasscodeKeydown(event)">
+        </div>
+
+        <button class="btn-unlock-dossier" id="btnUnlock" onclick="attemptUnlock()">破印启封 · 展卷</button>
+        <div style="font-size: 11px; color: var(--ink-muted); margin-top: 18px; letter-spacing: 1px;">研习手札 · 私密本地存盘</div>
+    </div>
+</div>
+
+<div class="container" id="mainContainer">
+
+    <!-- 顶部辅助栏（连续打卡天数徽印 + 推送钟铃 + 密钥更迭） -->
+    <div class="journal-top-aux">
+        <div class="streak-pill" id="streakBadge">
+            <span class="streak-fire-symbol">✦</span>
+            <span>连续研习：<strong id="streakCountNum">0</strong> 日</span>
+        </div>
+
+        <div class="aux-buttons-group">
+            <button class="btn-aux-text" id="btnPushBell" onclick="toggleWebPushBell()">缔结研习钟铃</button>
+            <button class="btn-aux-text" onclick="lockJournalNow()">封缄</button>
+            <button class="btn-aux-text" onclick="changePasscodeFlow()">改密</button>
+        </div>
+    </div>
+
+    <!-- 顶部封面（完整还原：法式手绘玫瑰 + 巴黎研习局同心圆波浪邮戳） -->
+    <header class="journal-header">
+        <div class="washi-tape"></div>
+
+        <!-- 完整恢复：高精度法式古典玫瑰矢量插画 -->
+        <div class="header-rose-box">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="roseGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FDE8EA" />
+                        <stop offset="60%" stop-color="#DE9EA9" />
+                        <stop offset="100%" stop-color="#B35868" />
+                    </radialGradient>
+                    <radialGradient id="roseCore" cx="40%" cy="40%" r="60%">
+                        <stop offset="0%" stop-color="#FFF0F2" />
+                        <stop offset="40%" stop-color="#E8A7B2" />
+                        <stop offset="90%" stop-color="#7D2836" />
+                    </radialGradient>
+                    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#98A88B" />
+                        <stop offset="100%" stop-color="#556947" />
+                    </linearGradient>
+                </defs>
+                <!-- 枝茎与主刺 -->
+                <path d="M48 68 C49 78, 47 88, 42 96" stroke="#556947" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M47 85 L44 87" stroke="#435537" stroke-width="1.4" stroke-linecap="round"/>
+                <!-- 左侧叶片与精雕叶脉 -->
+                <path d="M47 74 C36 71, 26 77, 24 84 C31 87, 42 81, 46 78 Z" fill="url(#leafGrad)" stroke="#435537" stroke-width="0.8"/>
+                <path d="M47 74 Q35 78 24 84" stroke="#D7E2CE" stroke-width="0.7"/>
+                <path d="M40 76 L42 74" stroke="#D7E2CE" stroke-width="0.5"/>
+                <path d="M34 79 L36 77" stroke="#D7E2CE" stroke-width="0.5"/>
+                <!-- 右侧叶片与精雕叶脉 -->
+                <path d="M46 80 C56 79, 66 84, 68 91 C61 93, 51 88, 46 83 Z" fill="url(#leafGrad)" stroke="#435537" stroke-width="0.8"/>
+                <path d="M46 80 Q57 85 68 91" stroke="#D7E2CE" stroke-width="0.7"/>
+                <path d="M52 82 L50 85" stroke="#D7E2CE" stroke-width="0.5"/>
+                <path d="M59 85 L57 88" stroke="#D7E2CE" stroke-width="0.5"/>
+                <!-- 绽放花托与层叠花瓣 -->
+                <path d="M50 36 C35 24, 18 36, 22 52 C25 66, 42 76, 50 78 C58 76, 75 66, 78 52 C82 36, 65 24, 50 36 Z" fill="url(#roseGlow)" stroke="#7D2836" stroke-width="1"/>
+                <path d="M34 46 C32 36, 44 28, 52 34 C60 28, 70 36, 66 46 C62 58, 54 66, 50 70 C46 66, 38 58, 34 46 Z" fill="url(#roseCore)" stroke="#681C28" stroke-width="0.9"/>
+                <path d="M45 42 C44 38, 48 34, 51 36 C55 34, 58 38, 56 42 C54 48, 47 48, 45 42 Z" fill="#FFF0F2" stroke="#52131D" stroke-width="0.8"/>
+                <!-- 花瓣涟漪纹路 -->
+                <path d="M43 45 Q50 52 57 45" stroke="#52131D" stroke-width="0.9"/>
+                <path d="M40 50 Q50 60 60 50" stroke="#681C28" stroke-width="0.9"/>
+                <path d="M35 56 Q50 68 65 56" stroke="#7D2836" stroke-width="1"/>
+                <path d="M31 63 Q50 74 69 63" stroke="#8B2635" stroke-width="0.8" stroke-dasharray="1 1"/>
+            </svg>
+        </div>
+
+        <div class="header-text-box">
+            <span class="post-brand-tag">Atelier d'étude · 研习手札</span>
+            <h1>行政职业能力测验研习录</h1>
+            <p>格物致知 · 熟能生巧 · 每日打卡手册</p>
+        </div>
+
+        <!-- 完整恢复：高精度法式双轨环绕邮戳 + 4道波浪消印矢量 -->
+        <div class="header-postmark-box">
+            <svg viewBox="0 0 130 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g transform="rotate(-10 50 45)">
+                    <!-- 同心双圆环轨 -->
+                    <circle cx="42" cy="45" r="36" stroke="#9A3C4D" stroke-width="1.8" opacity="0.85"/>
+                    <circle cx="42" cy="45" r="30" stroke="#9A3C4D" stroke-width="0.9" stroke-dasharray="3 2" opacity="0.85"/>
+                    <!-- 环形文字轨道定义 -->
+                    <defs>
+                        <path id="curveTopFull" d="M 18 45 A 24 24 0 0 1 66 45" fill="none"/>
+                        <path id="curveBottomFull" d="M 66 45 A 24 24 0 0 1 18 45" fill="none"/>
+                    </defs>
+                    <!-- 顶部环形文字：REPUBLIQUE FRANÇAISE -->
+                    <text font-family="'Cinzel', serif" font-size="6" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1">
+                        <textPath href="#curveTopFull" startOffset="50%" text-anchor="middle">REPUBLIQUE FRANÇAISE</textPath>
+                    </text>
+                    <!-- 底部环形文字：✦ PARIS ✦ -->
+                    <text font-family="'Cinzel', serif" font-size="6.5" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1.2">
+                        <textPath href="#curveBottomFull" startOffset="50%" text-anchor="middle">✦ PARIS ✦</textPath>
+                    </text>
+                    <!-- 核心局号与年份 -->
+                    <text x="42" y="42" font-family="'Cinzel', serif" font-size="7.5" font-weight="700" fill="#9A3C4D" text-anchor="middle">研习局</text>
+                    <text x="42" y="51" font-family="'Noto Serif SC', serif" font-size="6" fill="#9A3C4D" text-anchor="middle">2026.IX</text>
+                    <!-- 4道右延消印波浪纹 -->
+                    <path d="M 75 33 Q 86 28, 97 33 T 119 33 T 128 33" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+                    <path d="M 77 41 Q 88 36, 99 41 T 121 41 T 130 41" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+                    <path d="M 77 49 Q 88 44, 99 49 T 121 49 T 130 49" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+                    <path d="M 75 57 Q 86 52, 97 57 T 119 57 T 128 57" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+                </g>
+            </svg>
+        </div>
+    </header>
+
+    <!-- 导航栏 -->
+    <div class="nav-bar-wrapper">
+        <div class="nav-capsule">
+            <button class="nav-btn active" onclick="switchTab('entryView', this)">研习录入与明细</button>
+            <button class="nav-btn" onclick="switchTab('chartView', this)">统计·示图分析</button>
+            <button class="nav-btn" onclick="switchTab('reportView', this)">统计·汇总报表</button>
+        </div>
+    </div>
+
+    <!-- 视图 1：录入与明细 -->
+    <div id="entryView" class="tab-view active-view">
+        <div class="journal-card">
+            <div class="corner-flourish corner-tl"></div>
+            <div class="corner-flourish corner-tr"></div>
+            <div class="corner-flourish corner-bl"></div>
+            <div class="corner-flourish corner-br"></div>
+
+            <div class="card-header-bar">
+                <div class="card-title">今日做题情况归档</div>
+                <span style="font-size: 11px; color: var(--ink-muted); letter-spacing: 1px;">智能算分 · 自动汇入连击</span>
+            </div>
+
+            <div class="date-strip">
+                <label>研习日期</label>
+                <input type="date" id="inputDate">
+            </div>
+
+            <!-- 5个模块录入卡 -->
+            <div class="module-entry-grid">
+                <!-- 常识 -->
+                <div class="entry-ticket disabled-module" id="box_cs">
+                    <div class="ticket-top-bar">
+                        <span class="ticket-title">常识判断</span>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" class="retro-checkbox" id="check_cs" onchange="toggleModuleActive('cs')">
+                            <span>今日完成</span>
+                        </label>
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('cs')">
+                        <label>总题数</label>
+                        <input type="number" id="cs_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs')">
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('cs')">
+                        <label>做对数</label>
+                        <input type="number" id="cs_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs')">
+                    </div>
+                    <div class="live-accuracy-tag" id="tag_cs">未研习</div>
+                </div>
+
+                <!-- 言语 -->
+                <div class="entry-ticket disabled-module" id="box_yy">
+                    <div class="ticket-top-bar">
+                        <span class="ticket-title">言语理解</span>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" class="retro-checkbox" id="check_yy" onchange="toggleModuleActive('yy')">
+                            <span>今日完成</span>
+                        </label>
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('yy')">
+                        <label>总题数</label>
+                        <input type="number" id="yy_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy')">
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('yy')">
+                        <label>做对数</label>
+                        <input type="number" id="yy_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy')">
+                    </div>
+                    <div class="live-accuracy-tag" id="tag_yy">未研习</div>
+                </div>
+
+                <!-- 数量 -->
+                <div class="entry-ticket disabled-module" id="box_sl">
+                    <div class="ticket-top-bar">
+                        <span class="ticket-title">数量关系</span>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" class="retro-checkbox" id="check_sl" onchange="toggleModuleActive('sl')">
+                            <span>今日完成</span>
+                        </label>
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('sl')">
+                        <label>总题数</label>
+                        <input type="number" id="sl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl')">
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('sl')">
+                        <label>做对数</label>
+                        <input type="number" id="sl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl')">
+                    </div>
+                    <div class="live-accuracy-tag" id="tag_sl">未研习</div>
+                </div>
+
+                <!-- 逻辑 -->
+                <div class="entry-ticket disabled-module" id="box_lj">
+                    <div class="ticket-top-bar">
+                        <span class="ticket-title">判断推理</span>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" class="retro-checkbox" id="check_lj" onchange="toggleModuleActive('lj')">
+                            <span>今日完成</span>
+                        </label>
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('lj')">
+                        <label>总题数</label>
+                        <input type="number" id="lj_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj')">
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('lj')">
+                        <label>做对数</label>
+                        <input type="number" id="lj_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj')">
+                    </div>
+                    <div class="live-accuracy-tag" id="tag_lj">未研习</div>
+                </div>
+
+                <!-- 资料 -->
+                <div class="entry-ticket disabled-module" id="box_zl">
+                    <div class="ticket-top-bar">
+                        <span class="ticket-title">资料分析</span>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" class="retro-checkbox" id="check_zl" onchange="toggleModuleActive('zl')">
+                            <span>今日完成</span>
+                        </label>
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('zl')">
+                        <label>总题数</label>
+                        <input type="number" id="zl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl')">
+                    </div>
+                    <div class="entry-row" onclick="ensureUnlocked('zl')">
+                        <label>做对数</label>
+                        <input type="number" id="zl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl')">
+                    </div>
+                    <div class="live-accuracy-tag" id="tag_zl">未研习</div>
+                </div>
+            </div>
+
+            <button class="btn-submit-entry" onclick="submitEntry()">盖印存入研习档案</button>
+        </div>
+
+        <!-- 历史明细表 -->
+        <div class="journal-card">
+            <div class="corner-flourish corner-tl"></div>
+            <div class="corner-flourish corner-tr"></div>
+            <div class="corner-flourish corner-bl"></div>
+            <div class="corner-flourish corner-br"></div>
+
+            <div class="card-header-bar">
+                <div class="card-title">历史每日明细表</div>
+                <span style="font-size: 11px; color: var(--ink-muted);">网格全列透视</span>
+            </div>
+            <div class="table-responsive-box">
+                <table class="ledger-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="date-col">日期</th>
+                            <th colspan="2">常识</th>
+                            <th colspan="2">言语</th>
+                            <th colspan="2">数量</th>
+                            <th colspan="2">逻辑</th>
+                            <th colspan="2">资料</th>
+                            <th rowspan="2" class="action-col">操作</th>
+                        </tr>
+                        <tr>
+                            <th class="mod-sub-col">完成</th><th class="mod-sub-col">正确率</th>
+                            <th class="mod-sub-col">完成</th><th class="mod-sub-col">正确率</th>
+                            <th class="mod-sub-col">完成</th><th class="mod-sub-col">正确率</th>
+                            <th class="mod-sub-col">完成</th><th class="mod-sub-col">正确率</th>
+                            <th class="mod-sub-col">完成</th><th class="mod-sub-col">正确率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视图 2：统计·示图分析 -->
+    <div id="chartView" class="tab-view">
+        <div class="stat-banner-grid">
+            <div class="stat-paper-card">
+                <div class="badge-title">累计做题总数</div>
+                <div class="badge-num" id="statTotalQ">0</div>
+                <div class="badge-title">道题目</div>
+            </div>
+            <div class="stat-paper-card">
+                <div class="badge-title">综合加权正确率</div>
+                <div class="badge-num" id="statAvgAcc">0.0%</div>
+                <div class="badge-title">达标基准线: 75.0%</div>
+            </div>
+            <div class="stat-paper-card">
+                <div class="badge-title">优势领跑学科</div>
+                <div class="badge-num" style="font-size: 20px;" id="statBestName">--</div>
+                <div class="badge-title" id="statBestDesc">暂无数据</div>
+            </div>
+            <div class="stat-paper-card">
+                <div class="badge-title">重点攻坚短板</div>
+                <div class="badge-num" style="font-size: 20px; color: var(--rose-vintage);" id="statWeakName">--</div>
+                <div class="badge-title" id="statWeakDesc">暂无数据</div>
+            </div>
+        </div>
+
+        <div class="charts-two-columns">
+            <div class="chart-pod-card">
+                <div class="chart-title">各模块平均正确率柱状图</div>
+                <div id="accChartBox"></div>
+            </div>
+            <div class="chart-pod-card">
+                <div class="chart-title">各模块练习题量分布</div>
+                <div id="volChartBox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视图 3：统计·汇总报表 -->
+    <div id="reportView" class="tab-view">
+        <div class="journal-card">
+            <div class="corner-flourish corner-tl"></div>
+            <div class="corner-flourish corner-tr"></div>
+            <div class="corner-flourish corner-bl"></div>
+            <div class="corner-flourish corner-br"></div>
+
+            <div class="card-header-bar">
+                <div class="card-title">五大模块学情透视总览</div>
+                <span style="font-size: 11px; color: var(--ink-muted);">考评评级与策略建议</span>
+            </div>
+            <div class="table-responsive-box">
+                <table class="ledger-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 16%;">研习模块</th>
+                            <th style="width: 12%;">累计做题</th>
+                            <th style="width: 12%;">累计做对</th>
+                            <th style="width: 14%;">题量占比</th>
+                            <th style="width: 16%;">加权正确率</th>
+                            <th style="width: 14%;">学情考评</th>
+                            <th style="width: 16%;">研习策略</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 复古手账模态弹窗 -->
+<div id="vintageModalOverlay" class="vintage-modal-overlay">
+    <div class="vintage-modal-card">
+        <div class="modal-washi-tape"></div>
+        <div class="corner-flourish corner-tl"></div>
+        <div class="corner-flourish corner-tr"></div>
+        <div class="corner-flourish corner-bl"></div>
+        <div class="corner-flourish corner-br"></div>
+        <div class="modal-title-text" id="modalTitle">手札批注</div>
+        <div class="modal-body-text" id="modalBody">提示内容</div>
+        <div class="modal-actions-bar" id="modalActions"></div>
+    </div>
+</div>
+
+<script>
+    const MODULE_LIST = [
+        { id: 'cs', name: '常识判断' },
+        { id: 'yy', name: '言语理解' },
+        { id: 'sl', name: '数量关系' },
+        { id: 'lj', name: '判断推理' },
+        { id: 'zl', name: '资料分析' }
+    ];
+
+    const PASS_STORAGE_KEY = 'atelier_rose_journal_pin';
+
+    let ledgerDB = [];
+    try {
+        ledgerDB = JSON.parse(localStorage.getItem('smart_rose_ledger_v6')) || [];
+    } catch(e) {
+        ledgerDB = [];
+    }
+
+    window.onload = function() {
+        document.getElementById('inputDate').valueAsDate = new Date();
+        initLockScreenState();
+        registerServiceWorker();
+        updatePushBellStatus();
+        refreshAll();
+    };
+
+    /* ---------- PWA 与苹果 Web Push 服务注册 ---------- */
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then((reg) => {
+                console.log('手札 ServiceWorker 已就位:', reg.scope);
+            }).catch((err) => {
+                console.log('ServiceWorker 注册阻滞:', err);
+            });
+        }
+    }
+
+    function updatePushBellStatus() {
+        const btn = document.getElementById('btnPushBell');
+        if (window.Notification && Notification.permission === 'granted') {
+            btn.classList.add('active-bell');
+            btn.innerText = '钟铃已结 (15/18/21点)';
+        } else {
+            btn.classList.remove('active-bell');
+            btn.innerText = '缔结研习钟铃';
+        }
+    }
+
+    async function toggleWebPushBell() {
+        if (!('Notification' in window)) {
+            await showAtelierAlert('当前环境未探知到系统级通知支持，若是苹果手机，请先点击分享按钮【添加到主屏幕】后再开启。', '钟铃提示');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            const streak = computeConsecutiveDays();
+            await showAtelierAlert(`钟铃已处于缔结状态。每日 15:00、18:00、21:00 若尚未打卡，手札将自动横幅督省。\n当前连续研习已达 ${streak} 日。`, '督导钟铃');
+            return;
+        }
+
+        const confirmReq = await showAtelierConfirm('是否授权手札在每日 15:00、18:00、21:00 未做题时向您发送督导通知？', '缔结钟铃');
+        if (confirmReq) {
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                updatePushBellStatus();
+                await showAtelierAlert('钟铃之约已成。日落月升，手札将悉心督省研习功课。', '结印功成');
+            } else {
+                await showAtelierAlert('通知权限未获准许。日后如需开启，可在苹果设置中允许手札通知。', '封缄未开');
+            }
+        }
+    }
+
+    /* ---------- 连续研习打卡（Streak）核心算法 ---------- */
+    function computeConsecutiveDays() {
+        if (ledgerDB.length === 0) return 0;
+
+        const validDates = [...new Set(ledgerDB.filter(r => {
+            return MODULE_LIST.some(m => r[m.id] && r[m.id].done > 0);
+        }).map(r => r.date))].sort().reverse();
+
+        if (validDates.length === 0) return 0;
+
+        const now = new Date();
+        const formatDate = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}/${m}/${day}`;
+        };
+
+        const todayStr = formatDate(now);
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = formatDate(yesterday);
+
+        const latestRecord = validDates[0];
+        if (latestRecord !== todayStr && latestRecord !== yesterdayStr) {
+            return 0;
+        }
+
+        let streak = 0;
+        let cursorDate = new Date(latestRecord);
+
+        for (let i = 0; i < validDates.length; i++) {
+            const expectedStr = formatDate(cursorDate);
+            if (validDates.includes(expectedStr)) {
+                streak++;
+                cursorDate.setDate(cursorDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    /* ---------- 密令系统 ---------- */
+    function initLockScreenState() {
+        const storedPin = localStorage.getItem(PASS_STORAGE_KEY);
+        const lockSubtitle = document.getElementById('lockSubtitle');
+        const btnUnlock = document.getElementById('btnUnlock');
+        const passInput = document.getElementById('passcodeInput');
+
+        passInput.value = '';
+        if (!storedPin) {
+            lockSubtitle.innerText = '首次启卷 · 请设定您的专属手札密令';
+            btnUnlock.innerText = '铭刻密钥 · 启卷';
+            passInput.placeholder = '设定 4-12 位密钥';
+        } else {
+            lockSubtitle.innerText = '手札已封缄 · 键入密钥破印启卷';
+            btnUnlock.innerText = '破印启封 · 展卷';
+            passInput.placeholder = '输入手札密令';
+        }
+    }
+
+    function handlePasscodeKeydown(e) {
+        if (e.key === 'Enter') attemptUnlock();
+    }
+
+    async function attemptUnlock() {
+        const inputPin = document.getElementById('passcodeInput').value.trim();
+        const storedPin = localStorage.getItem(PASS_STORAGE_KEY);
+        const card = document.getElementById('lockCard');
+
+        if (!inputPin) {
+            triggerCardShake(card);
+            await showAtelierAlert('请先键入密令，方能启封手札', '手札封缄');
+            return;
+        }
+
+        if (!storedPin) {
+            if (inputPin.length < 4) {
+                triggerCardShake(card);
+                await showAtelierAlert('为确保护札安全，初始密令长度不可少于 4 位', '密钥设定');
+                return;
+            }
+            localStorage.setItem(PASS_STORAGE_KEY, inputPin);
+            await showAtelierAlert('专属研习密钥已铭刻入册，请妥善谨记', '金石铭刻');
+            executeOpenJournalAnimation();
+            return;
+        }
+
+        if (inputPin === storedPin) {
+            executeOpenJournalAnimation();
+        } else {
+            triggerCardShake(card);
+            document.getElementById('passcodeInput').value = '';
+            await showAtelierAlert('密令有误，火漆封印未解。请仔细核验后再试。', '封缄阻滞');
+        }
+    }
+
+    function triggerCardShake(card) {
+        card.classList.remove('shake');
+        void card.offsetWidth;
+        card.classList.add('shake');
+    }
+
+    function executeOpenJournalAnimation() {
+        const curtain = document.getElementById('lockScreen');
+        const container = document.getElementById('mainContainer');
+        curtain.classList.add('unlocked-fly');
+        setTimeout(() => {
+            container.classList.add('loaded');
+        }, 150);
+    }
+
+    function lockJournalNow() {
+        const curtain = document.getElementById('lockScreen');
+        const container = document.getElementById('mainContainer');
+        container.classList.remove('loaded');
+        curtain.classList.remove('unlocked-fly');
+        initLockScreenState();
+        setTimeout(() => {
+            document.getElementById('passcodeInput').focus();
+        }, 300);
+    }
+
+    async function changePasscodeFlow() {
+        const ok = await showAtelierConfirm('确定要更迭手札解锁密钥吗？需立即重新封缄设定。', '密令更迭');
+        if (ok) {
+            localStorage.removeItem(PASS_STORAGE_KEY);
+            lockJournalNow();
+        }
+    }
+
+    /* ---------- 复古弹窗 ---------- */
+    function showAtelierAlert(msg, title = '手札录讯') {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('vintageModalOverlay');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = msg;
+            const actions = document.getElementById('modalActions');
+            actions.innerHTML = `<button class="btn-modal btn-modal-primary" id="modalConfirmBtn">阅悉 · 归位</button>`;
+            overlay.classList.add('modal-show');
+            document.getElementById('modalConfirmBtn').onclick = function() {
+                overlay.classList.remove('modal-show');
+                resolve(true);
+            };
+        });
+    }
+
+    function showAtelierConfirm(msg, title = '研习决议') {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('vintageModalOverlay');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = msg;
+            const actions = document.getElementById('modalActions');
+            actions.innerHTML = `
+                <button class="btn-modal btn-modal-secondary" id="modalCancelBtn">容我再思</button>
+                <button class="btn-modal btn-modal-primary" id="modalConfirmBtn">决意定夺</button>
+            `;
+            overlay.classList.add('modal-show');
+            document.getElementById('modalCancelBtn').onclick = function() {
+                overlay.classList.remove('modal-show');
+                resolve(false);
+            };
+            document.getElementById('modalConfirmBtn').onclick = function() {
+                overlay.classList.remove('modal-show');
+                resolve(true);
+            };
+        });
+    }
+
+    /* ---------- 视图与录入 ---------- */
+    function switchTab(viewId, btn) {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active-view'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active-view');
+        btn.classList.add('active');
+        refreshAll();
+    }
+
+    function saveDB() {
+        localStorage.setItem('smart_rose_ledger_v6', JSON.stringify(ledgerDB));
+    }
+
+    function ensureUnlocked(modId) {
+        const chk = document.getElementById(`check_${modId}`);
+        if (!chk.checked) {
+            chk.checked = true;
+            toggleModuleActive(modId);
+            const doneInput = document.getElementById(`${modId}_done`);
+            setTimeout(() => doneInput.focus(), 30);
+        }
+    }
+
+    function toggleModuleActive(modId) {
+        const chk = document.getElementById(`check_${modId}`);
+        const box = document.getElementById(`box_${modId}`);
+        const doneInput = document.getElementById(`${modId}_done`);
+        const rightInput = document.getElementById(`${modId}_right`);
+        const tag = document.getElementById(`tag_${modId}`);
+
+        if (chk.checked) {
+            box.classList.remove('disabled-module');
+            doneInput.disabled = false;
+            rightInput.disabled = false;
+            calcModuleAcc(modId);
+        } else {
+            box.classList.add('disabled-module');
+            doneInput.disabled = true;
+            rightInput.disabled = true;
+            doneInput.value = '';
+            rightInput.value = '';
+            tag.innerText = '未研习';
+        }
+    }
+
+    function calcModuleAcc(modId) {
+        const chk = document.getElementById(`check_${modId}`);
+        if (!chk.checked) return;
+
+        const tag = document.getElementById(`tag_${modId}`);
+        const doneVal = document.getElementById(`${modId}_done`).value.trim();
+        const rightVal = document.getElementById(`${modId}_right`).value.trim();
+
+        if (doneVal === '') {
+            tag.innerText = '正确率：—';
+            return;
+        }
+
+        const done = Number(doneVal);
+        const right = Number(rightVal) || 0;
+
+        if (done <= 0) {
+            tag.innerText = '正确率：—';
+            return;
+        }
+
+        if (right > done) {
+            tag.innerText = '对题数不可大于总题数';
+            return;
+        }
+
+        const acc = ((right / done) * 100).toFixed(1);
+        tag.innerText = `正确率：${acc}% (${right}/${done})`;
+    }
+
+    async function submitEntry() {
+        const d = document.getElementById('inputDate').value;
+        if (!d) {
+            await showAtelierAlert('请先选定研习打卡的考查日期', '手札批注');
+            return;
+        }
+
+        let atLeastOne = false;
+        let entryItem = { date: d.replace(/-/g, '/') };
+
+        for (let m of MODULE_LIST) {
+            const isChecked = document.getElementById(`check_${m.id}`).checked;
+            if (isChecked) {
+                const done = Number(document.getElementById(`${m.id}_done`).value) || 0;
+                const right = Number(document.getElementById(`${m.id}_right`).value) || 0;
+
+                if (done > 0) {
+                    if (right > done) {
+                        await showAtelierAlert(`【${m.name}】做对题数不可大于总完成题数，请核验修正`, '数据稽核');
+                        return;
+                    }
+                    atLeastOne = true;
+                    const acc = Number(((right / done) * 100).toFixed(1));
+                    entryItem[m.id] = { done, right, acc };
+                } else {
+                    entryItem[m.id] = null;
+                }
+            } else {
+                entryItem[m.id] = null;
+            }
+        }
+
+        if (!atLeastOne) {
+            await showAtelierAlert('请至少勾选一个研习模块并填写完成题数', '手札提示');
+            return;
+        }
+
+        ledgerDB.unshift(entryItem);
+        saveDB();
+        refreshAll();
+
+        MODULE_LIST.forEach(m => {
+            const chk = document.getElementById(`check_${m.id}`);
+            chk.checked = false;
+            toggleModuleActive(m.id);
+        });
+
+        const streak = computeConsecutiveDays();
+        await showAtelierAlert(`今日研习记录已加盖印鉴归档！\n连续攻坚已汇聚为：${streak} 日。`, '功不唐捐');
+    }
+
+    async function removeRecord(idx) {
+        const ok = await showAtelierConfirm('确定要从研习手札中剔除该日作答记录吗？', '研习决议');
+        if (ok) {
+            ledgerDB.splice(idx, 1);
+            saveDB();
+            refreshAll();
+        }
+    }
+
+    function computeStats() {
+        let totalCount = 0;
+        let totalRight = 0;
+
+        let meta = {
+            cs: { done: 0, right: 0, name: '常识判断' },
+            yy: { done: 0, right: 0, name: '言语理解' },
+            sl: { done: 0, right: 0, name: '数量关系' },
+            lj: { done: 0, right: 0, name: '判断推理' },
+            zl: { done: 0, right: 0, name: '资料分析' }
+        };
+
+        ledgerDB.forEach(r => {
+            MODULE_LIST.forEach(m => {
+                const item = r[m.id];
+                if (item && item.done > 0) {
+                    meta[m.id].done += item.done;
+                    meta[m.id].right += item.right;
+                    totalCount += item.done;
+                    totalRight += item.right;
+                }
+            });
+        });
+
+        const moduleStats = MODULE_LIST.map(m => {
+            const item = meta[m.id];
+            const avgAcc = item.done > 0 ? ((item.right / item.done) * 100).toFixed(1) : 0;
+            const ratio = totalCount > 0 ? ((item.done / totalCount) * 100).toFixed(1) : '0.0';
+            return {
+                id: m.id,
+                name: item.name,
+                done: item.done,
+                right: item.right,
+                avgAcc: Number(avgAcc),
+                ratio: ratio
+            };
+        });
+
+        const overallAcc = totalCount > 0 ? ((totalRight / totalCount) * 100).toFixed(1) : '0.0';
+
+        return { totalCount, totalRight, avgAccuracy: overallAcc, modules: moduleStats };
+    }
+
+    function refreshAll() {
+        const stats = computeStats();
+        const streak = computeConsecutiveDays();
+        document.getElementById('streakCountNum').innerText = streak;
+        renderDetailList();
+        renderCharts(stats);
+        renderReportList(stats);
+    }
+
+    function renderDetailList() {
+        const tbody = document.getElementById('detailTbody');
+        tbody.innerHTML = '';
+
+        if (ledgerDB.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="12" style="padding: 26px 4px; color: var(--ink-muted);">手札尚无记录，请在上方勾选研习科目打卡</td></tr>`;
+            return;
+        }
+
+        ledgerDB.forEach((r, idx) => {
+            const tr = document.createElement('tr');
+            let cols = `<td>${r.date}</td>`;
+
+            MODULE_LIST.forEach(m => {
+                const modData = r[m.id];
+                if (modData && modData.done > 0) {
+                    cols += `<td>${modData.done}</td><td>${modData.acc}%</td>`;
+                } else {
+                    cols += `<td>—</td><td>—</td>`;
+                }
+            });
+
+            cols += `<td><button class="btn-del-record" onclick="removeRecord(${idx})">删</button></td>`;
+            tr.innerHTML = cols;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderCharts(stats) {
+        document.getElementById('statTotalQ').innerText = stats.totalCount;
+        document.getElementById('statAvgAcc').innerText = stats.avgAccuracy + '%';
+
+        const activeMods = stats.modules.filter(m => m.done > 0);
+        if (activeMods.length > 0) {
+            const sorted = [...activeMods].sort((a,b) => b.avgAcc - a.avgAcc);
+            const best = sorted[0];
+            const weak = sorted[sorted.length - 1];
+
+            document.getElementById('statBestName').innerText = best.name;
+            document.getElementById('statBestDesc').innerText = `正确率 ${best.avgAcc}% (${best.right}/${best.done}题)`;
+
+            document.getElementById('statWeakName').innerText = weak.name;
+            document.getElementById('statWeakDesc').innerText = `正确率 ${weak.avgAcc}% (${weak.right}/${weak.done}题)`;
+        } else {
+            document.getElementById('statBestName').innerText = '--';
+            document.getElementById('statBestDesc').innerText = '暂无数据';
+            document.getElementById('statWeakName').innerText = '--';
+            document.getElementById('statWeakDesc').innerText = '暂无数据';
+        }
+
+        const accBox = document.getElementById('accChartBox');
+        const volBox = document.getElementById('volChartBox');
+
+        if (stats.totalCount === 0) {
+            const emptyTip = `<div style="text-align:center; padding: 30px; font-size:12px; color:var(--ink-muted);">暂无记录 · 待录入后生成学情示图</div>`;
+            accBox.innerHTML = emptyTip;
+            volBox.innerHTML = emptyTip;
+            return;
+        }
+
+        accBox.innerHTML = '';
+        stats.modules.forEach(m => {
+            accBox.innerHTML += `
+                <div class="bar-metric-row">
+                    <div class="bar-label">${m.name}</div>
+                    <div class="bar-groove"><div class="bar-liquid" style="width: ${m.avgAcc}%;"></div></div>
+                    <div class="bar-value">${m.avgAcc}%</div>
+                </div>
+            `;
+        });
+
+        volBox.innerHTML = '';
+        const maxDone = Math.max(...stats.modules.map(m => m.done), 1);
+        stats.modules.forEach(m => {
+            const wPct = ((m.done / maxDone) * 100).toFixed(1);
+            volBox.innerHTML += `
+                <div class="bar-metric-row">
+                    <div class="bar-label">${m.name}</div>
+                    <div class="bar-groove"><div class="bar-liquid" style="width: ${wPct}%; background: linear-gradient(90deg, #D4A5A5, var(--bordeaux));"></div></div>
+                    <div class="bar-value">${m.done}题</div>
+                </div>
+            `;
+        });
+    }
+
+    function renderReportList(stats) {
+        const tbody = document.getElementById('reportTbody');
+        tbody.innerHTML = '';
+
+        if (stats.totalCount === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="padding: 26px 4px; color: var(--ink-muted);">尚无数据生成报表，请先在录入页面打卡</td></tr>`;
+            return;
+        }
+
+        stats.modules.forEach(m => {
+            const tr = document.createElement('tr');
+            let grade = '未研习';
+            let plan = '暂无数据';
+
+            if (m.done > 0) {
+                if (m.avgAcc >= 80) { grade = '精进'; plan = '维持做题节奏'; }
+                else if (m.avgAcc >= 70) { grade = '稳健'; plan = '攻克中高难度题'; }
+                else { grade = '攻坚'; plan = '专项基础补强'; }
+            }
+
+            tr.innerHTML = `
+                <td style="font-weight:600; color:var(--bordeaux);">${m.name}</td>
+                <td>${m.done}</td>
+                <td>${m.right}</td>
+                <td>${m.ratio}%</td>
+                <td style="font-weight:700; color:var(--rose-vintage);">${m.avgAcc}%</td>
+                <td><span style="background:var(--rose-mist); border:1px solid var(--border-line); padding:1px 6px; border-radius:10px; font-size:10px;">${grade}</span></td>
+                <td style="font-size: 11px;">${plan}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+</script>
+
+</body>
+</html>
