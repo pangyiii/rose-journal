@@ -1213,7 +1213,7 @@
        2. vapidPublicKey：跟 Worker 里 VAPID_PUBLIC_KEY 保持完全一致 */
     const PUSH_CONFIG = {
         workerBase: 'https://rose-journal-push.pangyiii629.workers.dev',
-        vapidPublicKey: 'BKBmoSlwd2unzbhBMf8He1aHucc12LMwZJi9H8vfEuccynXSY-LO46PL3wNNOc7u8R1y-sXXLrv_pLhp-ZLQl88'
+        vapidPublicKey: 'BGKZyZksVVaB-CpKV1v-0_q_EW6htXNqcfM-HvoK_bgvanA8GHwosrkI1W_a5Sd7v8tT-7yCN4VQ30_PXPLKa6Q'
     };
 
     function getClientId() {
@@ -1340,16 +1340,13 @@
             return;
         }
 
-        if (Notification.permission === 'granted') {
-            const streak = computeConsecutiveDays();
-            await showAtelierAlert(`钟铃已处于缔结状态。每日 15:00、18:00、21:00 若尚未打卡，手札将自动督省提醒。\n当前连续研习已达 ${streak} 日。`, '督导钟铃');
-            return;
+        let perm = Notification.permission;
+        if (perm !== 'granted') {
+            const confirmReq = await showAtelierConfirm('是否授权手札在每日 15:00、18:00、21:00 未做题时向您发送督导通知？', '缔结钟铃');
+            if (!confirmReq) return;
+            perm = await Notification.requestPermission();
         }
 
-        const confirmReq = await showAtelierConfirm('是否授权手札在每日 15:00、18:00、21:00 未做题时向您发送督导通知？', '缔结钟铃');
-        if (!confirmReq) return;
-
-        const perm = await Notification.requestPermission();
         if (perm !== 'granted') {
             await showAtelierAlert('通知权限未获准许。日后如需开启，可在苹果设置中允许手札通知。', '封缄未开');
             return;
@@ -1357,9 +1354,21 @@
 
         try {
             const reg = await navigator.serviceWorker.ready;
-            const subscription = await reg.pushManager.subscribe({
+            const desiredKey = urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey);
+            let subscription = await reg.pushManager.getSubscription();
+            if (subscription) {
+                const currentKey = subscription.options.applicationServerKey;
+                const sameKey = currentKey &&
+                    currentKey.byteLength === desiredKey.byteLength &&
+                    new Uint8Array(currentKey).every((value, index) => value === desiredKey[index]);
+                if (!sameKey) {
+                    await subscription.unsubscribe();
+                    subscription = null;
+                }
+            }
+            subscription = subscription || await reg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey)
+                applicationServerKey: desiredKey
             });
 
             const resp = await fetch(`${PUSH_CONFIG.workerBase}/api/subscribe`, {
