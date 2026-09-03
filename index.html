@@ -12,10 +12,6 @@
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="manifest" href="./manifest.json">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --parchment: #FAF5EE;
@@ -34,12 +30,12 @@
             --radius-pill: 9999px;
         }
 
-        /* 隐藏滚动条并适配苹果安全区 */
+        /* 隐藏滚动条并适配苹果安全区，全面采用苹果系统级古典衬线字体 */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Noto Serif SC', "Songti SC", "SimSun", serif;
+            font-family: font-family: 'Noto Serif SC', serif;
             -webkit-font-smoothing: antialiased;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
@@ -55,7 +51,6 @@
             background-color: var(--parchment);
             color: var(--ink-text);
             min-height: 100vh;
-            /* 适配苹果手机顶部刘海/灵动岛与底部操作条的安全距离 */
             padding-top: max(20px, env(safe-area-inset-top));
             padding-bottom: max(60px, env(safe-area-inset-bottom));
             padding-left: max(10px, env(safe-area-inset-left));
@@ -151,7 +146,7 @@
         }
 
         .lock-brand-tag {
-            font-family: 'Cinzel', serif;
+            font-family: "Didot", "Bodoni 72", "Baskerville", serif;
             font-size: 11px;
             letter-spacing: 4px;
             color: var(--antique-gold);
@@ -218,8 +213,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         /* 连续打卡徽印（Streak Badge） */
@@ -266,7 +260,7 @@
             border-color: var(--rose-petal);
         }
 
-        /* 头部封面（完整保留艺术画幅尺寸） */
+        /* 头部封面 */
         .journal-header {
             position: relative;
             background: var(--paper-creme);
@@ -309,7 +303,7 @@
         }
 
         .post-brand-tag {
-            font-family: 'Cinzel', serif;
+            font-family: "Didot", "Bodoni 72", "Baskerville", serif;
             font-size: 11px;
             letter-spacing: 4px;
             color: var(--antique-gold);
@@ -870,11 +864,11 @@
         </div>
     </div>
 
-    <!-- 顶部封面（完整还原：法式手绘玫瑰 + 巴黎研习局同心圆波浪邮戳） -->
+    <!-- 顶部封面 -->
     <header class="journal-header">
         <div class="washi-tape"></div>
 
-        <!-- 完整恢复：高精度法式古典玫瑰矢量插画 -->
+        <!-- 博物馆级法式古典玫瑰矢量插画 -->
         <div class="header-rose-box">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -893,24 +887,19 @@
                         <stop offset="100%" stop-color="#556947" />
                     </linearGradient>
                 </defs>
-                <!-- 枝茎与主刺 -->
                 <path d="M48 68 C49 78, 47 88, 42 96" stroke="#556947" stroke-width="2.5" stroke-linecap="round"/>
                 <path d="M47 85 L44 87" stroke="#435537" stroke-width="1.4" stroke-linecap="round"/>
-                <!-- 左侧叶片与精雕叶脉 -->
                 <path d="M47 74 C36 71, 26 77, 24 84 C31 87, 42 81, 46 78 Z" fill="url(#leafGrad)" stroke="#435537" stroke-width="0.8"/>
                 <path d="M47 74 Q35 78 24 84" stroke="#D7E2CE" stroke-width="0.7"/>
                 <path d="M40 76 L42 74" stroke="#D7E2CE" stroke-width="0.5"/>
                 <path d="M34 79 L36 77" stroke="#D7E2CE" stroke-width="0.5"/>
-                <!-- 右侧叶片与精雕叶脉 -->
                 <path d="M46 80 C56 79, 66 84, 68 91 C61 93, 51 88, 46 83 Z" fill="url(#leafGrad)" stroke="#435537" stroke-width="0.8"/>
                 <path d="M46 80 Q57 85 68 91" stroke="#D7E2CE" stroke-width="0.7"/>
                 <path d="M52 82 L50 85" stroke="#D7E2CE" stroke-width="0.5"/>
                 <path d="M59 85 L57 88" stroke="#D7E2CE" stroke-width="0.5"/>
-                <!-- 绽放花托与层叠花瓣 -->
                 <path d="M50 36 C35 24, 18 36, 22 52 C25 66, 42 76, 50 78 C58 76, 75 66, 78 52 C82 36, 65 24, 50 36 Z" fill="url(#roseGlow)" stroke="#7D2836" stroke-width="1"/>
                 <path d="M34 46 C32 36, 44 28, 52 34 C60 28, 70 36, 66 46 C62 58, 54 66, 50 70 C46 66, 38 58, 34 46 Z" fill="url(#roseCore)" stroke="#681C28" stroke-width="0.9"/>
                 <path d="M45 42 C44 38, 48 34, 51 36 C55 34, 58 38, 56 42 C54 48, 47 48, 45 42 Z" fill="#FFF0F2" stroke="#52131D" stroke-width="0.8"/>
-                <!-- 花瓣涟漪纹路 -->
                 <path d="M43 45 Q50 52 57 45" stroke="#52131D" stroke-width="0.9"/>
                 <path d="M40 50 Q50 60 60 50" stroke="#681C28" stroke-width="0.9"/>
                 <path d="M35 56 Q50 68 65 56" stroke="#7D2836" stroke-width="1"/>
@@ -919,35 +908,29 @@
         </div>
 
         <div class="header-text-box">
-            <span class="post-brand-tag">Atelier d'étude</span>
-            <h1>我の研习手札</h1>
-            <p>No complaining about the darkness</p>
+            <span class="post-brand-tag">Atelier d'étude · 研习手札</span>
+            <h1>行政职业能力测验研习录</h1>
+            <p>格物致知 · 熟能生巧 · 每日打卡手册</p>
         </div>
 
-        <!-- 完整恢复：高精度法式双轨环绕邮戳 + 4道波浪消印矢量 -->
+        <!-- 法式双轨环绕邮戳 + 4道波浪消印矢量 -->
         <div class="header-postmark-box">
             <svg viewBox="0 0 130 90" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g transform="rotate(-10 50 45)">
-                    <!-- 同心双圆环轨 -->
                     <circle cx="42" cy="45" r="36" stroke="#9A3C4D" stroke-width="1.8" opacity="0.85"/>
                     <circle cx="42" cy="45" r="30" stroke="#9A3C4D" stroke-width="0.9" stroke-dasharray="3 2" opacity="0.85"/>
-                    <!-- 环形文字轨道定义 -->
                     <defs>
                         <path id="curveTopFull" d="M 18 45 A 24 24 0 0 1 66 45" fill="none"/>
                         <path id="curveBottomFull" d="M 66 45 A 24 24 0 0 1 18 45" fill="none"/>
                     </defs>
-                    <!-- 顶部环形文字：REPUBLIQUE FRANÇAISE -->
-                    <text font-family="'Cinzel', serif" font-size="6" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1">
+                    <text font-family="'Didot', 'Bodoni 72', serif" font-size="6" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1">
                         <textPath href="#curveTopFull" startOffset="50%" text-anchor="middle">REPUBLIQUE FRANÇAISE</textPath>
                     </text>
-                    <!-- 底部环形文字：✦ PARIS ✦ -->
-                    <text font-family="'Cinzel', serif" font-size="6.5" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1.2">
+                    <text font-family="'Didot', 'Bodoni 72', serif" font-size="6.5" font-weight="700" fill="#9A3C4D" opacity="0.9" letter-spacing="1.2">
                         <textPath href="#curveBottomFull" startOffset="50%" text-anchor="middle">✦ PARIS ✦</textPath>
                     </text>
-                    <!-- 核心局号与年份 -->
-                    <text x="42" y="42" font-family="'Cinzel', serif" font-size="7.5" font-weight="700" fill="#9A3C4D" text-anchor="middle">研习局</text>
-                    <text x="42" y="51" font-family="'Noto Serif SC', serif" font-size="6" fill="#9A3C4D" text-anchor="middle">2026.IX</text>
-                    <!-- 4道右延消印波浪纹 -->
+                    <text x="42" y="42" font-family="'Didot', 'Songti SC', serif" font-size="7.5" font-weight="700" fill="#9A3C4D" text-anchor="middle">研习局</text>
+                    <text x="42" y="51" font-family="'Songti SC', serif" font-size="6" fill="#9A3C4D" text-anchor="middle">2026.IX</text>
                     <path d="M 75 33 Q 86 28, 97 33 T 119 33 T 128 33" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
                     <path d="M 77 41 Q 88 36, 99 41 T 121 41 T 130 41" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
                     <path d="M 77 49 Q 88 44, 99 49 T 121 49 T 130 49" stroke="#9A3C4D" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
@@ -976,32 +959,32 @@
 
             <div class="card-header-bar">
                 <div class="card-title">今日做题情况归档</div>
-                <span style="font-size: 11px; color: var(--ink-muted); letter-spacing: 1px;">智能算分 · 自动汇入连击</span>
+                <span style="font-size: 11px; color: var(--ink-muted); letter-spacing: 1px;">墨稿实时留存 · 自动汇入连击</span>
             </div>
 
             <div class="date-strip">
                 <label>研习日期</label>
-                <input type="date" id="inputDate">
+                <input type="date" id="inputDate" onchange="saveDraft()">
             </div>
 
-            <!-- 5个模块录入卡 -->
+            <!-- 5个模块录入卡（支持实时草稿写入） -->
             <div class="module-entry-grid">
                 <!-- 常识 -->
                 <div class="entry-ticket disabled-module" id="box_cs">
                     <div class="ticket-top-bar">
                         <span class="ticket-title">常识判断</span>
                         <label class="toggle-wrap">
-                            <input type="checkbox" class="retro-checkbox" id="check_cs" onchange="toggleModuleActive('cs')">
+                            <input type="checkbox" class="retro-checkbox" id="check_cs" onchange="toggleModuleActive('cs'); saveDraft();">
                             <span>今日完成</span>
                         </label>
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('cs')">
                         <label>总题数</label>
-                        <input type="number" id="cs_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs')">
+                        <input type="number" id="cs_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs'); saveDraft();">
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('cs')">
                         <label>做对数</label>
-                        <input type="number" id="cs_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs')">
+                        <input type="number" id="cs_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('cs'); saveDraft();">
                     </div>
                     <div class="live-accuracy-tag" id="tag_cs">未研习</div>
                 </div>
@@ -1011,17 +994,17 @@
                     <div class="ticket-top-bar">
                         <span class="ticket-title">言语理解</span>
                         <label class="toggle-wrap">
-                            <input type="checkbox" class="retro-checkbox" id="check_yy" onchange="toggleModuleActive('yy')">
+                            <input type="checkbox" class="retro-checkbox" id="check_yy" onchange="toggleModuleActive('yy'); saveDraft();">
                             <span>今日完成</span>
                         </label>
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('yy')">
                         <label>总题数</label>
-                        <input type="number" id="yy_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy')">
+                        <input type="number" id="yy_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy'); saveDraft();">
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('yy')">
                         <label>做对数</label>
-                        <input type="number" id="yy_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy')">
+                        <input type="number" id="yy_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('yy'); saveDraft();">
                     </div>
                     <div class="live-accuracy-tag" id="tag_yy">未研习</div>
                 </div>
@@ -1031,17 +1014,17 @@
                     <div class="ticket-top-bar">
                         <span class="ticket-title">数量关系</span>
                         <label class="toggle-wrap">
-                            <input type="checkbox" class="retro-checkbox" id="check_sl" onchange="toggleModuleActive('sl')">
+                            <input type="checkbox" class="retro-checkbox" id="check_sl" onchange="toggleModuleActive('sl'); saveDraft();">
                             <span>今日完成</span>
                         </label>
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('sl')">
                         <label>总题数</label>
-                        <input type="number" id="sl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl')">
+                        <input type="number" id="sl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl'); saveDraft();">
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('sl')">
                         <label>做对数</label>
-                        <input type="number" id="sl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl')">
+                        <input type="number" id="sl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('sl'); saveDraft();">
                     </div>
                     <div class="live-accuracy-tag" id="tag_sl">未研习</div>
                 </div>
@@ -1051,17 +1034,17 @@
                     <div class="ticket-top-bar">
                         <span class="ticket-title">判断推理</span>
                         <label class="toggle-wrap">
-                            <input type="checkbox" class="retro-checkbox" id="check_lj" onchange="toggleModuleActive('lj')">
+                            <input type="checkbox" class="retro-checkbox" id="check_lj" onchange="toggleModuleActive('lj'); saveDraft();">
                             <span>今日完成</span>
                         </label>
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('lj')">
                         <label>总题数</label>
-                        <input type="number" id="lj_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj')">
+                        <input type="number" id="lj_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj'); saveDraft();">
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('lj')">
                         <label>做对数</label>
-                        <input type="number" id="lj_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj')">
+                        <input type="number" id="lj_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('lj'); saveDraft();">
                     </div>
                     <div class="live-accuracy-tag" id="tag_lj">未研习</div>
                 </div>
@@ -1071,17 +1054,17 @@
                     <div class="ticket-top-bar">
                         <span class="ticket-title">资料分析</span>
                         <label class="toggle-wrap">
-                            <input type="checkbox" class="retro-checkbox" id="check_zl" onchange="toggleModuleActive('zl')">
+                            <input type="checkbox" class="retro-checkbox" id="check_zl" onchange="toggleModuleActive('zl'); saveDraft();">
                             <span>今日完成</span>
                         </label>
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('zl')">
                         <label>总题数</label>
-                        <input type="number" id="zl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl')">
+                        <input type="number" id="zl_done" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl'); saveDraft();">
                     </div>
                     <div class="entry-row" onclick="ensureUnlocked('zl')">
                         <label>做对数</label>
-                        <input type="number" id="zl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl')">
+                        <input type="number" id="zl_right" placeholder="0" min="0" disabled oninput="calcModuleAcc('zl'); saveDraft();">
                     </div>
                     <div class="live-accuracy-tag" id="tag_zl">未研习</div>
                 </div>
@@ -1221,6 +1204,7 @@
     ];
 
     const PASS_STORAGE_KEY = 'atelier_rose_journal_pin';
+    const DRAFT_STORAGE_KEY = 'atelier_rose_journal_draft';
 
     let ledgerDB = [];
     try {
@@ -1234,8 +1218,55 @@
         initLockScreenState();
         registerServiceWorker();
         updatePushBellStatus();
+        loadDraft(); // 恢复未提交的草稿墨迹
         refreshAll();
     };
+
+    /* ---------- 实时草稿留存（随时输入、随时记录、再次进入仍在） ---------- */
+    function saveDraft() {
+        const draft = {
+            date: document.getElementById('inputDate').value,
+            modules: {}
+        };
+        MODULE_LIST.forEach(m => {
+            draft.modules[m.id] = {
+                checked: document.getElementById(`check_${m.id}`).checked,
+                done: document.getElementById(`${m.id}_done`).value,
+                right: document.getElementById(`${m.id}_right`).value
+            };
+        });
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    }
+
+    function loadDraft() {
+        const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (!raw) return;
+        try {
+            const draft = JSON.parse(raw);
+            if (draft.date) {
+                document.getElementById('inputDate').value = draft.date;
+            }
+            if (draft.modules) {
+                MODULE_LIST.forEach(m => {
+                    const modDraft = draft.modules[m.id];
+                    if (modDraft) {
+                        const chk = document.getElementById(`check_${m.id}`);
+                        chk.checked = !!modDraft.checked;
+                        toggleModuleActive(m.id, false); // 保持已有数值，不强制清零
+                        document.getElementById(`${m.id}_done`).value = modDraft.done || '';
+                        document.getElementById(`${m.id}_right`).value = modDraft.right || '';
+                        calcModuleAcc(m.id);
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('草稿恢复异常:', e);
+        }
+    }
+
+    function clearDraft() {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+    }
 
     /* ---------- PWA 与苹果 Web Push 服务注册 ---------- */
     function registerServiceWorker() {
@@ -1283,7 +1314,7 @@
         }
     }
 
-    /* ---------- 连续研习打卡（Streak）核心算法 ---------- */
+    /* ---------- 连续打卡天数算法 ---------- */
     function computeConsecutiveDays() {
         if (ledgerDB.length === 0) return 0;
 
@@ -1471,12 +1502,13 @@
         if (!chk.checked) {
             chk.checked = true;
             toggleModuleActive(modId);
+            saveDraft();
             const doneInput = document.getElementById(`${modId}_done`);
             setTimeout(() => doneInput.focus(), 30);
         }
     }
 
-    function toggleModuleActive(modId) {
+    function toggleModuleActive(modId, resetValues = true) {
         const chk = document.getElementById(`check_${modId}`);
         const box = document.getElementById(`box_${modId}`);
         const doneInput = document.getElementById(`${modId}_done`);
@@ -1492,9 +1524,11 @@
             box.classList.add('disabled-module');
             doneInput.disabled = true;
             rightInput.disabled = true;
-            doneInput.value = '';
-            rightInput.value = '';
-            tag.innerText = '未研习';
+            if (resetValues) {
+                doneInput.value = '';
+                rightInput.value = '';
+                tag.innerText = '未研习';
+            }
         }
     }
 
@@ -1567,12 +1601,14 @@
 
         ledgerDB.unshift(entryItem);
         saveDB();
+        clearDraft(); // 提交成功后清空暂存草稿
         refreshAll();
 
+        // 界面恢复初始状态
         MODULE_LIST.forEach(m => {
             const chk = document.getElementById(`check_${m.id}`);
             chk.checked = false;
-            toggleModuleActive(m.id);
+            toggleModuleActive(m.id, true);
         });
 
         const streak = computeConsecutiveDays();
