@@ -1,5 +1,5 @@
 /* 行测研习手札 · 离线全量缓存与后台服务 */
-const CACHE_NAME = 'atelier-journal-offline-v3';
+const CACHE_NAME = 'atelier-journal-offline-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
